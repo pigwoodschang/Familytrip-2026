@@ -5,154 +5,87 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>家族旅遊記帳</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    min-height: 100vh; color: #e8e8f0;
-  }
-  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
-
-  /* Toast */
-  #toast {
-    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-    background: rgba(20,20,40,0.96); border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 20px; padding: 8px 20px; font-size: 13px; z-index: 999;
-    white-space: nowrap; backdrop-filter: blur(10px); display: none;
-  }
-
-  /* Header */
-  #header {
-    padding: 22px 20px 14px;
-    background: rgba(255,255,255,0.04);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .header-row { display: flex; justify-content: space-between; align-items: center; }
-  .trip-sub { font-size: 10px; letter-spacing: 3px; color: #7f8fa6; text-transform: uppercase; margin-bottom: 3px; }
-  .trip-name { font-size: 19px; font-weight: 700; color: #fff; }
-  .header-btns { display: flex; gap: 8px; align-items: center; }
-  .icon-btn { background: rgba(255,255,255,0.08); border: none; color: #aaa; border-radius: 10px; padding: 7px 10px; cursor: pointer; font-size: 15px; }
-  .sync-label { font-size: 11px; color: #54a0ff; display: none; }
-
-  /* Budget bar */
-  .budget-row { display: flex; justify-content: space-between; font-size: 12px; color: #7f8fa6; margin: 14px 0 5px; }
-  .bar-bg { height: 7px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-  .budget-remain { margin-top: 5px; font-size: 12px; text-align: right; }
-  .sheets-badge { margin-top: 10px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: #7f8fa6; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: #00d2d3; }
-
-  /* Nav */
-  #nav { display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .nav-btn {
-    flex: 1; padding: 10px 0; background: transparent; border: none;
-    color: #7f8fa6; cursor: pointer; font-size: 11px;
-    border-bottom: 2px solid transparent; transition: all 0.2s;
-    font-family: inherit;
-  }
-  .nav-btn.active { background: rgba(84,160,255,0.15); color: #54a0ff; border-bottom-color: #54a0ff; }
-  .nav-icon { font-size: 16px; }
-
-  /* Content */
-  #content { flex: 1; padding: 18px; overflow-y: auto; }
-
-  /* Cards */
-  .card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 16px; }
-  .card-title { font-size: 12px; color: #7f8fa6; margin-bottom: 12px; }
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .stat-card { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); }
-  .stat-label { font-size: 11px; color: #7f8fa6; margin-bottom: 5px; }
-  .stat-value { font-size: 18px; font-weight: 700; }
-
-  /* Cat bar */
-  .cat-row { margin-bottom: 11px; }
-  .cat-info { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
-  .mini-bar-bg { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
-  .mini-bar { height: 100%; border-radius: 3px; }
-
-  /* Recent */
-  .recent-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .cat-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
-
-  /* Form */
-  .form-label { font-size: 11px; color: #7f8fa6; margin-bottom: 5px; }
-  .form-group { margin-bottom: 14px; }
-  input, select, textarea {
-    width: 100%; padding: 11px 13px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px; color: #e8e8f0; font-size: 14px; outline: none;
-    font-family: inherit;
-  }
-  textarea { resize: none; }
-  input::placeholder, textarea::placeholder { color: #7f8fa6; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  /* Currency toggle */
-  .cur-toggle { display: flex; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); flex-shrink: 0; }
-  .cur-btn { padding: 0 14px; background: rgba(255,255,255,0.05); border: none; color: #aaa; cursor: pointer; font-size: 13px; font-family: inherit; }
-  .cur-btn.active { background: rgba(84,160,255,0.3); color: #54a0ff; font-weight: 700; }
-
-  /* Cat grid */
-  .cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
-  .cat-btn { padding: 9px 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #aaa; cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s; }
-
-  /* Member chips */
-  .chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
-  .chip { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #aaa; cursor: pointer; font-size: 13px; font-family: inherit; }
-  .chip.active { border-color: #54a0ff; background: rgba(84,160,255,0.2); color: #54a0ff; }
-
-  /* Buttons */
-  .btn-primary {
-    width: 100%; padding: 13px; background: linear-gradient(90deg,#54a0ff,#5f27cd);
-    border: none; border-radius: 14px; color: #fff; font-size: 15px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-  }
-  .btn-primary:disabled { background: rgba(84,160,255,0.4); cursor: not-allowed; }
-  .btn-ghost { width: 100%; padding: 11px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; color: #aaa; font-size: 13px; cursor: pointer; margin-top: 9px; font-family: inherit; }
-
-  /* Filter tabs */
-  .filter-wrap { display: flex; gap: 7px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
-  .filter-btn { white-space: nowrap; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #aaa; cursor: pointer; font-size: 12px; font-family: inherit; }
-  .filter-btn.active { border-color: #54a0ff; background: rgba(84,160,255,0.2); color: #54a0ff; }
-
-  /* Expense item */
-  .exp-item { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 13px; margin-bottom: 9px; border: 1px solid rgba(255,255,255,0.07); display: flex; gap: 10px; align-items: center; }
-  .exp-icon { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .exp-actions { display: flex; gap: 5px; margin-top: 5px; }
-  .btn-edit { background: rgba(84,160,255,0.15); border: none; color: #54a0ff; border-radius: 6px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
-  .btn-del { background: rgba(255,107,107,0.15); border: none; color: #ff6b6b; border-radius: 6px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
-
-  /* Split */
-  .settle-row { display: flex; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .settle-from { background: rgba(255,107,107,0.15); border-radius: 8px; padding: 5px 12px; font-size: 13px; color: #ff6b6b; font-weight: 600; }
-  .settle-to { background: rgba(0,210,211,0.15); border-radius: 8px; padding: 5px 12px; font-size: 13px; color: #00d2d3; font-weight: 600; }
-  .settle-mid { flex: 1; text-align: center; }
-
-  /* FX */
-  .fx-rate-card { background: linear-gradient(135deg,rgba(84,160,255,0.15),rgba(95,39,205,0.15)); border-radius: 16px; padding: 16px; border: 1px solid rgba(84,160,255,0.25); margin-bottom: 18px; text-align: center; }
-  .fx-dir-toggle { display: flex; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 16px; }
-  .fx-dir-btn { flex: 1; padding: 12px 8px; background: rgba(255,255,255,0.04); border: none; color: #aaa; cursor: pointer; font-size: 14px; font-family: inherit; }
-  .fx-dir-btn.active { background: rgba(84,160,255,0.2); color: #54a0ff; font-weight: 700; }
-  .fx-result { background: rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; margin-bottom: 20px; }
-  .fx-ref-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-
-  /* Settings members */
-  .member-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .member-row input { flex: 1; padding: 8px 12px; font-size: 13px; }
-  .btn-remove { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.25); color: #ff6b6b; cursor: pointer; font-size: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .btn-add-member { padding: 8px 14px; border-radius: 10px; background: rgba(84,160,255,0.2); border: 1px solid rgba(84,160,255,0.35); color: #54a0ff; cursor: pointer; font-size: 18px; flex-shrink: 0; font-family: inherit; }
-  .danger-zone { margin-top: 22px; padding: 13px; background: rgba(255,107,107,0.08); border-radius: 14px; border: 1px solid rgba(255,107,107,0.2); }
-
-  .empty { text-align: center; color: #7f8fa6; padding: 30px 0; font-size: 13px; }
-  .hint { font-size: 11px; color: #7f8fa6; margin-top: 6px; }
-  .eur-hint { font-size: 11px; color: #7f8fa6; margin-top: 5px; text-align: right; }
-
-  @keyframes sl { from{transform:translateX(-60px)} to{transform:translateX(130px)} }
-  .loading-bar-inner { height: 100%; width: 55%; background: linear-gradient(90deg,#54a0ff,#5f27cd); border-radius: 2px; animation: sl 1.2s ease-in-out infinite alternate; }
-
-  #loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; }
-  .loading-bar { width: 180px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans TC','PingFang TC',sans-serif; background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); min-height:100vh; color:#e8e8f0; }
+#app { max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
+#toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:rgba(20,20,40,0.96); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:8px 20px; font-size:13px; z-index:999; white-space:nowrap; backdrop-filter:blur(10px); display:none; }
+#loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:16px; }
+.loading-bar { width:180px; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+.loading-bar-inner { height:100%; width:55%; background:linear-gradient(90deg,#54a0ff,#5f27cd); border-radius:2px; animation:sl 1.2s ease-in-out infinite alternate; }
+@keyframes sl { from{transform:translateX(-60px)} to{transform:translateX(130px)} }
+#header { padding:22px 20px 14px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); }
+.header-row { display:flex; justify-content:space-between; align-items:center; }
+.trip-sub { font-size:10px; letter-spacing:3px; color:#7f8fa6; text-transform:uppercase; margin-bottom:3px; }
+.trip-name { font-size:19px; font-weight:700; color:#fff; }
+.header-btns { display:flex; gap:8px; align-items:center; }
+.icon-btn { background:rgba(255,255,255,0.08); border:none; color:#aaa; border-radius:10px; padding:7px 10px; cursor:pointer; font-size:15px; }
+.sync-label { font-size:11px; color:#54a0ff; }
+.budget-row { display:flex; justify-content:space-between; font-size:12px; color:#7f8fa6; margin:14px 0 5px; }
+.bar-bg { height:7px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; transition:width 0.5s; }
+.budget-remain { margin-top:5px; font-size:12px; text-align:right; }
+.sheets-badge { margin-top:10px; display:flex; align-items:center; gap:6px; font-size:11px; color:#7f8fa6; }
+.dot { width:7px; height:7px; border-radius:50%; background:#00d2d3; flex-shrink:0; }
+#nav { display:flex; background:rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.06); }
+.nav-btn { flex:1; padding:10px 0; background:transparent; border:none; color:#7f8fa6; cursor:pointer; font-size:11px; border-bottom:2px solid transparent; transition:all 0.2s; font-family:inherit; }
+.nav-btn.active { background:rgba(84,160,255,0.15); color:#54a0ff; border-bottom-color:#54a0ff; }
+.nav-icon { font-size:16px; }
+#content { flex:1; padding:18px; overflow-y:auto; }
+.card { background:rgba(255,255,255,0.05); border-radius:16px; padding:15px; border:1px solid rgba(255,255,255,0.08); margin-bottom:16px; }
+.card-title { font-size:12px; color:#7f8fa6; margin-bottom:12px; }
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.stat-card { background:rgba(255,255,255,0.05); border-radius:14px; padding:14px; border:1px solid rgba(255,255,255,0.08); }
+.stat-label { font-size:11px; color:#7f8fa6; margin-bottom:5px; }
+.stat-value { font-size:18px; font-weight:700; }
+.cat-row { margin-bottom:11px; }
+.cat-info { display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; }
+.mini-bar-bg { height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.mini-bar { height:100%; border-radius:3px; }
+.recent-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.cat-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+.form-label { font-size:11px; color:#7f8fa6; margin-bottom:5px; }
+.form-group { margin-bottom:14px; }
+input, select, textarea { width:100%; padding:11px 13px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:12px; color:#e8e8f0; font-size:14px; outline:none; font-family:inherit; }
+textarea { resize:none; }
+input::placeholder, textarea::placeholder { color:#7f8fa6; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.cur-toggle { display:flex; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.12); flex-shrink:0; }
+.cur-btn { padding:0 14px; background:rgba(255,255,255,0.05); border:none; color:#aaa; cursor:pointer; font-size:13px; font-family:inherit; }
+.cur-btn.active { background:rgba(84,160,255,0.3); color:#54a0ff; font-weight:700; }
+.cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.cat-btn { padding:9px 4px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#aaa; cursor:pointer; font-size:12px; font-family:inherit; transition:all 0.2s; }
+.chip-wrap { display:flex; flex-wrap:wrap; gap:7px; }
+.chip { padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); background:transparent; color:#aaa; cursor:pointer; font-size:13px; font-family:inherit; }
+.chip.active { border-color:#54a0ff; background:rgba(84,160,255,0.2); color:#54a0ff; }
+.btn-primary { width:100%; padding:13px; background:linear-gradient(90deg,#54a0ff,#5f27cd); border:none; border-radius:14px; color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+.btn-primary:disabled { background:rgba(84,160,255,0.4); cursor:not-allowed; }
+.btn-ghost { width:100%; padding:11px; background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:14px; color:#aaa; font-size:13px; cursor:pointer; margin-top:9px; font-family:inherit; }
+.filter-wrap { display:flex; gap:7px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; }
+.filter-btn { white-space:nowrap; padding:5px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); background:transparent; color:#aaa; cursor:pointer; font-size:12px; font-family:inherit; }
+.filter-btn.active { border-color:#54a0ff; background:rgba(84,160,255,0.2); color:#54a0ff; }
+.exp-item { background:rgba(255,255,255,0.04); border-radius:14px; padding:13px; margin-bottom:9px; border:1px solid rgba(255,255,255,0.07); display:flex; gap:10px; align-items:center; }
+.exp-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+.exp-actions { display:flex; gap:5px; margin-top:5px; }
+.btn-edit { background:rgba(84,160,255,0.15); border:none; color:#54a0ff; border-radius:6px; padding:3px 7px; cursor:pointer; font-size:12px; }
+.btn-del { background:rgba(255,107,107,0.15); border:none; color:#ff6b6b; border-radius:6px; padding:3px 7px; cursor:pointer; font-size:12px; }
+.settle-row { display:flex; align-items:center; gap:8px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.settle-from { background:rgba(255,107,107,0.15); border-radius:8px; padding:5px 12px; font-size:13px; color:#ff6b6b; font-weight:600; }
+.settle-to { background:rgba(0,210,211,0.15); border-radius:8px; padding:5px 12px; font-size:13px; color:#00d2d3; font-weight:600; }
+.settle-mid { flex:1; text-align:center; }
+.fx-rate-card { background:linear-gradient(135deg,rgba(84,160,255,0.15),rgba(95,39,205,0.15)); border-radius:16px; padding:16px; border:1px solid rgba(84,160,255,0.25); margin-bottom:18px; text-align:center; }
+.fx-dir-toggle { display:flex; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.12); margin-bottom:16px; }
+.fx-dir-btn { flex:1; padding:12px 8px; background:rgba(255,255,255,0.04); border:none; color:#aaa; cursor:pointer; font-size:14px; font-family:inherit; }
+.fx-dir-btn.active { background:rgba(84,160,255,0.2); color:#54a0ff; font-weight:700; }
+.fx-result { background:rgba(255,255,255,0.06); border-radius:16px; padding:20px; border:1px solid rgba(255,255,255,0.1); text-align:center; margin-bottom:20px; }
+.fx-ref-row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+.member-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.member-row input { flex:1; padding:8px 12px; font-size:13px; }
+.btn-remove { width:32px; height:32px; border-radius:8px; background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.25); color:#ff6b6b; cursor:pointer; font-size:14px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:inherit; }
+.btn-add-member { padding:8px 14px; border-radius:10px; background:rgba(84,160,255,0.2); border:1px solid rgba(84,160,255,0.35); color:#54a0ff; cursor:pointer; font-size:18px; flex-shrink:0; font-family:inherit; }
+.danger-zone { margin-top:22px; padding:13px; background:rgba(255,107,107,0.08); border-radius:14px; border:1px solid rgba(255,107,107,0.2); }
+.empty { text-align:center; color:#7f8fa6; padding:30px 0; font-size:13px; }
+.hint { font-size:11px; color:#7f8fa6; margin-top:6px; }
+.eur-hint { font-size:11px; color:#7f8fa6; margin-top:5px; text-align:right; }
 </style>
 </head>
 <body>
@@ -164,97 +97,93 @@
     <div class="loading-bar"><div class="loading-bar-inner"></div></div>
   </div>
 </div>
-
 <script>
+(function(){
+
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyrjytsE22hsroYZT_8Ih2U1LRzN0YvBY3rfu1_-oZnh5RwHrYpw6FRE-EQiOgfosuO7w/exec";
-
 const CATS = [
-  {id:"food",      label:"🍜 餐飲", color:"#FF6B6B"},
-  {id:"transport", label:"🚌 交通", color:"#4ECDC4"},
-  {id:"hotel",     label:"🏨 住宿", color:"#45B7D1"},
-  {id:"ticket",    label:"🎡 門票", color:"#96CEB4"},
-  {id:"shopping",  label:"🛍 購物", color:"#FFEAA7"},
-  {id:"other",     label:"📦 其他", color:"#DDA0DD"},
+  {id:"food",label:"🍜 餐飲",color:"#FF6B6B"},
+  {id:"transport",label:"🚌 交通",color:"#4ECDC4"},
+  {id:"hotel",label:"🏨 住宿",color:"#45B7D1"},
+  {id:"ticket",label:"🎡 門票",color:"#96CEB4"},
+  {id:"shopping",label:"🛍 購物",color:"#FFEAA7"},
+  {id:"other",label:"📦 其他",color:"#DDA0DD"},
 ];
+const DEF = {tripName:"家族旅遊",budget:300000,eurRate:35.5,members:["爸爸","媽媽","孩子1","孩子2"]};
 
-const DEF = {tripName:"家族旅遊", budget:300000, eurRate:35.5, members:["爸爸","媽媽","孩子1","孩子2"]};
-
-let config = {...DEF};
+let config = JSON.parse(JSON.stringify(DEF));
 let expenses = [];
 let view = "dashboard";
 let filterCat = "all";
 let editId = null;
 let syncing = false;
 let convDir = "TWD_TO_EUR";
-
+let fxInput = "";
 let form = emptyForm();
-function emptyForm() {
-  return {title:"", amount:"", currency:"TWD", category:"food", paidBy:"全家", date:today(), note:"", splitAmong:[]};
-}
-function today() { return new Date().toISOString().split("T")[0]; }
+let settingsMembers = [];
 
-const fmt    = n => new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",minimumFractionDigits:0}).format(n);
+function emptyForm(){ return {title:"",amount:"",currency:"TWD",category:"food",paidBy:"全家",date:today(),note:"",splitAmong:[]}; }
+function today(){ return new Date().toISOString().split("T")[0]; }
+const fmt = n => new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",minimumFractionDigits:0}).format(n);
 const fmtEUR = n => new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",minimumFractionDigits:2}).format(n);
 const getCat = id => CATS.find(c=>c.id===id)||CATS[5];
-const getMembers = () => config.members?.length>0 ? config.members : DEF.members;
+const getMembers = () => (config.members&&config.members.length>0)?config.members:DEF.members;
+const esc = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 // JSONP
-function jsonp(params) {
-  return new Promise((resolve, reject) => {
-    const cb = "_cb" + Date.now() + Math.random().toString(36).slice(2);
-    const qs = Object.entries({...params, callback:cb})
+function jsonp(params){
+  return new Promise((resolve,reject)=>{
+    const cb="_cb"+Date.now()+Math.random().toString(36).slice(2);
+    const qs=Object.entries({...params,callback:cb})
       .map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(typeof v==="object"?JSON.stringify(v):v))
       .join("&");
-    const s = document.createElement("script");
-    const t = setTimeout(()=>{cleanup();reject(new Error("timeout"));}, 15000);
+    const s=document.createElement("script");
+    const t=setTimeout(()=>{cleanup();reject(new Error("timeout"));},15000);
     function cleanup(){clearTimeout(t);delete window[cb];if(s.parentNode)s.remove();}
-    window[cb] = data=>{cleanup();resolve(data);};
-    s.onerror = ()=>{cleanup();reject(new Error("network error"));};
-    s.src = GAS_URL+"?"+qs;
+    window[cb]=data=>{cleanup();resolve(data);};
+    s.onerror=()=>{cleanup();reject(new Error("network error"));};
+    s.src=GAS_URL+"?"+qs;
     document.head.appendChild(s);
   });
 }
 
 // Toast
 let toastTimer;
-function showToast(msg, ms=2500) {
-  const el = document.getElementById("toast");
-  el.textContent = msg; el.style.display = "block";
+function showToast(msg,ms=2500){
+  const el=document.getElementById("toast");
+  if(!el)return;
+  el.textContent=msg; el.style.display="block";
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ el.style.display="none"; }, ms);
+  toastTimer=setTimeout(()=>{el.style.display="none";},ms);
 }
 
-function setSyncing(v) {
-  syncing = v;
-  const el = document.querySelector(".sync-label");
-  if (el) el.style.display = v ? "block" : "none";
+function setSyncing(v){
+  syncing=v;
+  const el=document.querySelector(".sync-label");
+  if(el) el.style.display=v?"inline":"none";
 }
 
-// Load data
-async function loadAll() {
-  try {
+// Load
+async function loadAll(){
+  try{
     await jsonp({action:"init"});
-    const [cfg, exps] = await Promise.all([
-      jsonp({action:"getConfig"}),
-      jsonp({action:"getAll"}),
-    ]);
-    if (cfg && !cfg.error) config = {...DEF, ...cfg};
-    if (Array.isArray(exps)) expenses = exps;
-    render();
-  } catch(e) {
-    showToast("⚠️ 無法連線："+e.message, 5000);
-    render(); // render anyway with local state
+    const [cfg,exps]=await Promise.all([jsonp({action:"getConfig"}),jsonp({action:"getAll"})]);
+    if(cfg&&!cfg.error) config={...DEF,...cfg};
+    if(Array.isArray(exps)) expenses=exps;
+  }catch(e){
+    showToast("⚠️ 無法連線："+e.message,5000);
   }
+  render();
 }
 
 // Balances
-function calcBalances() {
-  const members = getMembers();
-  const paid={}, sp={};
+function calcBalances(){
+  const members=getMembers();
+  const paid={},sp={};
   members.forEach(m=>{paid[m]=0;sp[m]=0;});
   expenses.forEach(exp=>{
-    const among = exp.splitAmong?.length>0 ? exp.splitAmong : members;
-    const share = exp.amount/among.length;
+    const among=exp.splitAmong&&exp.splitAmong.length>0?exp.splitAmong:members;
+    const share=exp.amount/among.length;
     if(exp.paidBy==="全家") members.forEach(m=>{paid[m]+=exp.amount/members.length;});
     else if(members.includes(exp.paidBy)) paid[exp.paidBy]+=exp.amount;
     else members.forEach(m=>{paid[m]+=exp.amount/members.length;});
@@ -265,7 +194,7 @@ function calcBalances() {
   return b;
 }
 
-function calcSettlements(balances) {
+function calcSettlements(balances){
   const cr=[],db=[];
   Object.entries(balances).forEach(([n,b])=>{
     if(b>0.5)cr.push({name:n,amount:b});
@@ -283,396 +212,481 @@ function calcSettlements(balances) {
 }
 
 // ── RENDER ──
-function render() {
-  document.getElementById("loading").style.display = "none";
-  const app = document.getElementById("app");
+function render(){
+  document.getElementById("loading").style.display="none";
+  const members=getMembers();
+  const total=expenses.reduce((s,e)=>s+e.amount,0);
+  const remaining=config.budget-total;
+  const pct=Math.min((total/config.budget)*100,100);
+  const barColor=pct>90?"linear-gradient(90deg,#ff6b6b,#ee5a24)":pct>70?"linear-gradient(90deg,#ffd32a,#ff9f43)":"linear-gradient(90deg,#00d2d3,#54a0ff)";
 
-  const members = getMembers();
-  const total = expenses.reduce((s,e)=>s+e.amount,0);
-  const remaining = config.budget - total;
-  const pct = Math.min((total/config.budget)*100,100);
-  const barColor = pct>90?"linear-gradient(90deg,#ff6b6b,#ee5a24)":pct>70?"linear-gradient(90deg,#ffd32a,#ff9f43)":"linear-gradient(90deg,#00d2d3,#54a0ff)";
+  const navItems=[["dashboard","📊","總覽"],["add","➕","新增"],["list","📋","明細"],["split","⚖️","分帳"],["fx","💱","換算"]];
 
-  let html = `
-  <div id="header">
-    <div class="header-row">
-      <div>
-        <div class="trip-sub">家族旅遊記帳</div>
-        <div class="trip-name">${esc(config.tripName)}</div>
-      </div>
-      <div class="header-btns">
-        <span class="sync-label" style="display:${syncing?"block":"none"}">同步中…</span>
-        <button class="icon-btn" onclick="reload()">🔄</button>
-        <button class="icon-btn" onclick="setView('settings')">⚙️</button>
-      </div>
+  let html=`
+<div id="header">
+  <div class="header-row">
+    <div>
+      <div class="trip-sub">家族旅遊記帳</div>
+      <div class="trip-name">${esc(config.tripName)}</div>
     </div>
-    <div class="budget-row"><span>已花費 ${fmt(total)}</span><span>預算 ${fmt(config.budget)}</span></div>
-    <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-    <div class="budget-remain">
-      <span style="color:${remaining<0?"#ff6b6b":"#00d2d3"}">${remaining<0?"⚠ 超支 "+fmt(-remaining):"剩餘 "+fmt(remaining)}</span>
-      <span style="color:#7f8fa6;margin-left:8px">≈ ${fmtEUR(remaining/config.eurRate)}</span>
+    <div class="header-btns">
+      <span class="sync-label" style="display:${syncing?"inline":"none"}">同步中…</span>
+      <button class="icon-btn" id="btn-reload">🔄</button>
+      <button class="icon-btn" id="btn-settings">⚙️</button>
     </div>
-    <div class="sheets-badge"><div class="dot"></div>已連線 Google Sheets・多裝置即時同步</div>
   </div>
-  <div id="nav">
-    ${[["dashboard","📊","總覽"],["add","➕","新增"],["list","📋","明細"],["split","⚖️","分帳"],["fx","💱","換算"]]
-      .map(([v,icon,label])=>`<button class="nav-btn ${view===v?"active":""}" onclick="setView('${v}')"><div class="nav-icon">${icon}</div>${label}</button>`).join("")}
+  <div class="budget-row"><span>已花費 ${fmt(total)}</span><span>預算 ${fmt(config.budget)}</span></div>
+  <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+  <div class="budget-remain">
+    <span style="color:${remaining<0?"#ff6b6b":"#00d2d3"}">${remaining<0?"⚠ 超支 "+fmt(-remaining):"剩餘 "+fmt(remaining)}</span>
+    <span style="color:#7f8fa6;margin-left:8px">≈ ${fmtEUR(remaining/config.eurRate)}</span>
   </div>
-  <div id="content">`;
+  <div class="sheets-badge"><div class="dot"></div>已連線 Google Sheets・多裝置即時同步</div>
+</div>
+<div id="nav">
+  ${navItems.map(([v,icon,label])=>`<button class="nav-btn ${view===v?"active":""}" data-view="${v}"><div class="nav-icon">${icon}</div>${label}</button>`).join("")}
+</div>
+<div id="content">`;
 
-  if (view==="dashboard") html += renderDashboard(total, pct);
-  else if (view==="add")  html += renderAdd(members);
-  else if (view==="list") html += renderList(members);
-  else if (view==="split") html += renderSplit(members);
-  else if (view==="fx")   html += renderFX();
-  else if (view==="settings") html += renderSettings(members);
+  if(view==="dashboard") html+=renderDashboard(total);
+  else if(view==="add")  html+=renderAdd(members);
+  else if(view==="list") html+=renderList();
+  else if(view==="split") html+=renderSplit(members);
+  else if(view==="fx")   html+=renderFX();
+  else if(view==="settings") html+=renderSettings();
 
-  html += `</div></div>`;
-  app.innerHTML = html;
-  bindEvents();
+  html+=`</div>`;
+  document.getElementById("app").innerHTML=html;
+  attachEvents();
 }
 
-function renderDashboard(total) {
-  const cats = CATS.map(c=>({...c,t:expenses.filter(e=>e.category===c.id).reduce((s,e)=>s+e.amount,0)})).filter(c=>c.t>0).sort((a,b)=>b.t-a.t);
-  const recent = [...expenses].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+function renderDashboard(total){
+  const cats=CATS.map(c=>({...c,t:expenses.filter(e=>e.category===c.id).reduce((s,e)=>s+e.amount,0)})).filter(c=>c.t>0).sort((a,b)=>b.t-a.t);
+  const recent=[...expenses].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   return `
-  <div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">總筆數</div><div class="stat-value" style="color:#54a0ff">${expenses.length} 筆</div></div>
-    <div class="stat-card"><div class="stat-label">總花費(€)</div><div class="stat-value" style="color:#ffd32a">${fmtEUR(total/config.eurRate)}</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">類別分析</div>
-    ${cats.length===0?`<div class="empty">還沒有記錄，開始記帳吧！</div>`:cats.map(c=>`
-    <div class="cat-row">
-      <div class="cat-info"><span>${c.label}</span><div><span style="color:${c.color};font-weight:600">${fmt(c.t)}</span><span style="color:#7f8fa6;font-size:11px;margin-left:6px">≈${fmtEUR(c.t/config.eurRate)}</span></div></div>
-      <div class="mini-bar-bg"><div class="mini-bar" style="width:${total>0?(c.t/total)*100:0}%;background:${c.color}"></div></div>
-    </div>`).join("")}
-  </div>
-  <div class="card">
-    <div class="card-title">最近記錄</div>
-    ${recent.length===0?`<div class="empty">尚無記錄</div>`:recent.map(e=>{
-      const cat=getCat(e.category);
-      return `<div class="recent-item">
-        <div class="cat-icon" style="background:${cat.color}22">${cat.label.split(" ")[0]}</div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:500">${esc(e.title)}</div><div style="font-size:11px;color:#7f8fa6">${e.date} · ${esc(e.paidBy)}</div></div>
-        <div style="text-align:right"><div style="color:${cat.color};font-weight:700;font-size:13px">${fmt(e.amount)}</div><div style="color:#7f8fa6;font-size:10px">${fmtEUR(e.amount/config.eurRate)}</div></div>
-      </div>`;
-    }).join("")}
-  </div>`;
-}
-
-function renderAdd(members) {
-  const eff = form.splitAmong.length>0 ? form.splitAmong : members;
-  const amtNum = Number(form.amount);
-  const eurHint = form.amount&&!isNaN(amtNum) ? (form.currency==="TWD"?`≈ ${fmtEUR(amtNum/config.eurRate)}`:`≈ ${fmt(Math.round(amtNum*config.eurRate))}`) : "";
-  const perPerson = eff.length>0&&form.amount&&!isNaN(amtNum) ? Math.round((form.currency==="EUR"?amtNum*config.eurRate:amtNum)/eff.length) : 0;
-  return `
-  <div style="font-size:17px;font-weight:700;margin-bottom:18px">${editId?"✏️ 編輯記錄":"➕ 新增支出"}</div>
-  <div class="form-group"><div class="form-label">名稱</div><input id="f-title" value="${esc(form.title)}" placeholder="例：羅浮宮門票"></div>
-  <div class="form-group">
-    <div class="form-label">金額</div>
-    <div style="display:flex;gap:8px">
-      <input id="f-amount" type="number" value="${form.amount}" placeholder="0" style="flex:1">
-      <div class="cur-toggle">
-        <button class="cur-btn ${form.currency==="TWD"?"active":""}" onclick="setCur('TWD')">NT$</button>
-        <button class="cur-btn ${form.currency==="EUR"?"active":""}" onclick="setCur('EUR')">€</button>
-      </div>
-    </div>
-    ${eurHint?`<div class="eur-hint">${eurHint}</div>`:""}
-  </div>
-  <div class="row2 form-group">
-    <div><div class="form-label">日期</div><input id="f-date" type="date" value="${form.date}"></div>
-    <div><div class="form-label">付款人</div>
-      <select id="f-paidby">${["全家",...members].map(m=>`<option${m===form.paidBy?" selected":""}>${esc(m)}</option>`).join("")}</select>
-    </div>
-  </div>
-  <div class="form-group">
-    <div class="form-label">類別</div>
-    <div class="cat-grid">${CATS.map(c=>`<button class="cat-btn" data-cat="${c.id}" style="border-color:${form.category===c.id?c.color:"rgba(255,255,255,0.1)"};background:${form.category===c.id?c.color+"22":"rgba(255,255,255,0.04)"};color:${form.category===c.id?c.color:"#aaa"}">${c.label}</button>`).join("")}</div>
-  </div>
-  <div class="form-group">
-    <div class="form-label">分攤對象</div>
-    <div class="chip-wrap">${members.map(m=>`<button class="chip ${eff.includes(m)?"active":""}" data-member="${esc(m)}">${esc(m)}</button>`).join("")}</div>
-    ${perPerson>0?`<div class="hint">每人負擔 ≈ ${fmt(perPerson)} <span style="margin-left:6px">${fmtEUR(perPerson/config.eurRate)}</span></div>`:""}
-  </div>
-  <div class="form-group"><div class="form-label">備註（選填）</div><textarea id="f-note" rows="2" placeholder="備註…">${esc(form.note)}</textarea></div>
-  <button class="btn-primary" onclick="submitForm()" ${syncing?"disabled":""}>${syncing?"同步中…":editId?"儲存修改":"新增記錄"}</button>
-  ${editId?`<button class="btn-ghost" onclick="cancelEdit()">取消</button>`:""}`;
-}
-
-function renderList(members) {
-  const filtered = [...expenses].filter(e=>filterCat==="all"||e.category===filterCat).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  return `
-  <div class="filter-wrap">
-    <button class="filter-btn ${filterCat==="all"?"active":""}" onclick="setFilter('all')">全部</button>
-    ${CATS.map(c=>`<button class="filter-btn ${filterCat===c.id?"active":""}" onclick="setFilter('${c.id}')">${c.label}</button>`).join("")}
-  </div>
-  ${filtered.length===0?`<div class="empty">沒有符合的記錄</div>`:filtered.map(e=>{
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-label">總筆數</div><div class="stat-value" style="color:#54a0ff">${expenses.length} 筆</div></div>
+  <div class="stat-card"><div class="stat-label">總花費(€)</div><div class="stat-value" style="color:#ffd32a">${fmtEUR(total/config.eurRate)}</div></div>
+</div>
+<div class="card">
+  <div class="card-title">類別分析</div>
+  ${cats.length===0?`<div class="empty">還沒有記錄，開始記帳吧！</div>`:cats.map(c=>`
+  <div class="cat-row">
+    <div class="cat-info"><span>${c.label}</span><div><span style="color:${c.color};font-weight:600">${fmt(c.t)}</span><span style="color:#7f8fa6;font-size:11px;margin-left:6px">≈${fmtEUR(c.t/config.eurRate)}</span></div></div>
+    <div class="mini-bar-bg"><div class="mini-bar" style="width:${total>0?(c.t/total)*100:0}%;background:${c.color}"></div></div>
+  </div>`).join("")}
+</div>
+<div class="card">
+  <div class="card-title">最近記錄</div>
+  ${recent.length===0?`<div class="empty">尚無記錄</div>`:recent.map(e=>{
     const cat=getCat(e.category);
-    return `<div class="exp-item">
-      <div class="exp-icon" style="background:${cat.color}22">${cat.label.split(" ")[0]}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:14px">${esc(e.title)}</div>
-        <div style="font-size:11px;color:#7f8fa6;margin-top:2px">${e.date} · ${esc(e.paidBy)} · ${cat.label.split(" ")[1]}</div>
-        ${e.splitAmong?.length>0?`<div style="font-size:10px;color:#54a0ff;margin-top:2px">分攤：${e.splitAmong.map(esc).join("、")}</div>`:""}
-        ${e.note?`<div style="font-size:11px;color:#aaa;margin-top:2px">${esc(e.note)}</div>`:""}
+    return `<div class="recent-item">
+      <div class="cat-icon" style="background:${cat.color}22">${cat.label.split(" ")[0]}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${esc(e.title)}</div><div style="font-size:11px;color:#7f8fa6">${e.date} · ${esc(e.paidBy)}</div></div>
+      <div style="text-align:right"><div style="color:${cat.color};font-weight:700;font-size:13px">${fmt(e.amount)}</div><div style="color:#7f8fa6;font-size:10px">${fmtEUR(e.amount/config.eurRate)}</div></div>
+    </div>`;
+  }).join("")}
+</div>`;
+}
+
+function renderAdd(members){
+  const eff=form.splitAmong.length>0?form.splitAmong:[...members];
+  const amtNum=Number(form.amount);
+  const eurHint=form.amount&&!isNaN(amtNum)?(form.currency==="TWD"?`≈ ${fmtEUR(amtNum/config.eurRate)}`:`≈ ${fmt(Math.round(amtNum*config.eurRate))}`):"";
+  const perPerson=eff.length>0&&form.amount&&!isNaN(amtNum)?Math.round((form.currency==="EUR"?amtNum*config.eurRate:amtNum)/eff.length):0;
+  return `
+<div style="font-size:17px;font-weight:700;margin-bottom:18px">${editId?"✏️ 編輯記錄":"➕ 新增支出"}</div>
+<div class="form-group"><div class="form-label">名稱</div><input id="f-title" value="${esc(form.title)}" placeholder="例：羅浮宮門票"></div>
+<div class="form-group">
+  <div class="form-label">金額</div>
+  <div style="display:flex;gap:8px">
+    <input id="f-amount" type="number" value="${esc(form.amount)}" placeholder="0" style="flex:1">
+    <div class="cur-toggle">
+      <button class="cur-btn ${form.currency==="TWD"?"active":""}" data-cur="TWD">NT$</button>
+      <button class="cur-btn ${form.currency==="EUR"?"active":""}" data-cur="EUR">€</button>
+    </div>
+  </div>
+  ${eurHint?`<div class="eur-hint" id="eur-hint">${eurHint}</div>`:`<div class="eur-hint" id="eur-hint"></div>`}
+</div>
+<div class="row2 form-group">
+  <div><div class="form-label">日期</div><input id="f-date" type="date" value="${form.date}"></div>
+  <div><div class="form-label">付款人</div>
+    <select id="f-paidby">${["全家",...members].map(m=>`<option${m===form.paidBy?" selected":""}>${esc(m)}</option>`).join("")}</select>
+  </div>
+</div>
+<div class="form-group">
+  <div class="form-label">類別</div>
+  <div class="cat-grid">${CATS.map(c=>`<button class="cat-btn ${form.category===c.id?"cat-active":""}" data-cat="${c.id}" style="border-color:${form.category===c.id?c.color:"rgba(255,255,255,0.1)"};background:${form.category===c.id?c.color+"22":"rgba(255,255,255,0.04)"};color:${form.category===c.id?c.color:"#aaa"}">${c.label}</button>`).join("")}</div>
+</div>
+<div class="form-group">
+  <div class="form-label">分攤對象</div>
+  <div class="chip-wrap" id="chip-wrap">${members.map(m=>`<button class="chip ${eff.includes(m)?"active":""}" data-member="${esc(m)}">${esc(m)}</button>`).join("")}</div>
+  <div class="hint" id="per-person-hint">${perPerson>0?`每人負擔 ≈ ${fmt(perPerson)} ${fmtEUR(perPerson/config.eurRate)}`:"每人平均分攤"}</div>
+</div>
+<div class="form-group"><div class="form-label">備註（選填）</div><textarea id="f-note" rows="2" placeholder="備註…">${esc(form.note)}</textarea></div>
+<button class="btn-primary" id="btn-submit" ${syncing?"disabled":""}>${syncing?"同步中…":editId?"儲存修改":"新增記錄"}</button>
+${editId?`<button class="btn-ghost" id="btn-cancel">取消</button>`:""}`;
+}
+
+function renderList(){
+  const filtered=[...expenses].filter(e=>filterCat==="all"||e.category===filterCat).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  return `
+<div class="filter-wrap">
+  <button class="filter-btn ${filterCat==="all"?"active":""}" data-filter="all">全部</button>
+  ${CATS.map(c=>`<button class="filter-btn ${filterCat===c.id?"active":""}" data-filter="${c.id}">${c.label}</button>`).join("")}
+</div>
+${filtered.length===0?`<div class="empty">沒有符合的記錄</div>`:filtered.map(e=>{
+  const cat=getCat(e.category);
+  return `<div class="exp-item">
+    <div class="exp-icon" style="background:${cat.color}22">${cat.label.split(" ")[0]}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:600;font-size:14px">${esc(e.title)}</div>
+      <div style="font-size:11px;color:#7f8fa6;margin-top:2px">${e.date} · ${esc(e.paidBy)} · ${cat.label.split(" ")[1]}</div>
+      ${e.splitAmong&&e.splitAmong.length>0?`<div style="font-size:10px;color:#54a0ff;margin-top:2px">分攤：${e.splitAmong.map(esc).join("、")}</div>`:""}
+      ${e.note?`<div style="font-size:11px;color:#aaa;margin-top:2px">${esc(e.note)}</div>`:""}
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="color:${cat.color};font-weight:700;font-size:14px">${fmt(e.amount)}</div>
+      <div style="color:#7f8fa6;font-size:10px">${fmtEUR(e.amount/config.eurRate)}</div>
+      ${e.originalCurrency==="EUR"?`<div style="font-size:10px;color:#ffd32a">原 €${e.originalAmount}</div>`:""}
+      <div class="exp-actions">
+        <button class="btn-edit" data-id="${e.id}">✏️</button>
+        <button class="btn-del" data-id="${e.id}">🗑</button>
       </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="color:${cat.color};font-weight:700;font-size:14px">${fmt(e.amount)}</div>
-        <div style="color:#7f8fa6;font-size:10px">${fmtEUR(e.amount/config.eurRate)}</div>
-        ${e.originalCurrency==="EUR"?`<div style="font-size:10px;color:#ffd32a">原 €${e.originalAmount}</div>`:""}
-        <div class="exp-actions">
-          <button class="btn-edit" onclick="editExp('${e.id}')">✏️</button>
-          <button class="btn-del" onclick="delExp('${e.id}')">🗑</button>
-        </div>
+    </div>
+  </div>`;
+}).join("")}`;
+}
+
+function renderSplit(members){
+  const bal=calcBalances();
+  const sets=calcSettlements(bal);
+  return `
+<div style="font-size:17px;font-weight:700;margin-bottom:4px">⚖️ 分帳計算</div>
+<div style="font-size:12px;color:#7f8fa6;margin-bottom:18px">依每筆支出的付款人與分攤對象自動計算</div>
+<div class="card">
+  <div class="card-title">個人收支餘額</div>
+  ${members.map(m=>{
+    const b=bal[m]||0,isP=b>0.5,isM=b<-0.5;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:${isP?"rgba(0,210,211,0.15)":isM?"rgba(255,107,107,0.15)":"rgba(255,255,255,0.08)"};display:flex;align-items:center;justify-content:center;font-size:18px">${m==="爸爸"?"👨":m==="媽媽"?"👩":"🧒"}</div>
+        <div><div style="font-weight:600;font-size:14px">${esc(m)}</div><div style="font-size:11px;color:#7f8fa6">${isP?"應收回":isM?"應付出":"已結清"}</div></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;font-size:15px;color:${isP?"#00d2d3":isM?"#ff6b6b":"#7f8fa6"}">${isP?"+":""}${fmt(Math.round(b))}</div>
+        <div style="font-size:11px;color:#7f8fa6">${fmtEUR(b/config.eurRate)}</div>
       </div>
     </div>`;
-  }).join("")}`;
+  }).join("")}
+</div>
+<div class="card">
+  <div class="card-title">最佳結清方案</div>
+  ${sets.length===0?`<div style="text-align:center;padding:20px 0"><div style="font-size:28px;margin-bottom:8px">🎉</div><div style="color:#00d2d3;font-weight:600">已全部結清！</div></div>`
+  :sets.map(s=>`<div class="settle-row">
+    <div class="settle-from">${esc(s.from)}</div>
+    <div class="settle-mid"><div style="font-size:10px;color:#7f8fa6">支付給</div><div style="font-size:14px;font-weight:700;color:#ffd32a">${fmt(Math.round(s.amount))}</div><div style="font-size:10px;color:#7f8fa6">${fmtEUR(s.amount/config.eurRate)}</div></div>
+    <div class="settle-to">${esc(s.to)}</div>
+  </div>`).join("")}
+</div>`;
 }
 
-function renderSplit(members) {
-  const bal = calcBalances();
-  const sets = calcSettlements(bal);
+function renderFX(){
+  const inp=parseFloat(fxInput)||0;
+  const res=inp?(convDir==="TWD_TO_EUR"?inp/config.eurRate:inp*config.eurRate):null;
+  const nums=convDir==="TWD_TO_EUR"?[500,1000,3000,5000,10000,30000,50000]:[5,10,20,50,100,200,500];
   return `
-  <div style="font-size:17px;font-weight:700;margin-bottom:4px">⚖️ 分帳計算</div>
-  <div style="font-size:12px;color:#7f8fa6;margin-bottom:18px">依每筆支出的付款人與分攤對象自動計算</div>
-  <div class="card">
-    <div class="card-title">個人收支餘額</div>
-    ${members.map(m=>{
-      const b=bal[m]||0, isP=b>0.5, isM=b<-0.5;
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:10px;background:${isP?"rgba(0,210,211,0.15)":isM?"rgba(255,107,107,0.15)":"rgba(255,255,255,0.08)"};display:flex;align-items:center;justify-content:center;font-size:18px">${m==="爸爸"?"👨":m==="媽媽"?"👩":"🧒"}</div>
-          <div><div style="font-weight:600;font-size:14px">${esc(m)}</div><div style="font-size:11px;color:#7f8fa6">${isP?"應收回":isM?"應付出":"已結清"}</div></div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-weight:700;font-size:15px;color:${isP?"#00d2d3":isM?"#ff6b6b":"#7f8fa6"}">${isP?"+":""}${fmt(Math.round(b))}</div>
-          <div style="font-size:11px;color:#7f8fa6">${fmtEUR(b/config.eurRate)}</div>
-        </div>
-      </div>`;
-    }).join("")}
-  </div>
-  <div class="card">
-    <div class="card-title">最佳結清方案</div>
-    ${sets.length===0?`<div style="text-align:center;padding:20px 0"><div style="font-size:28px;margin-bottom:8px">🎉</div><div style="color:#00d2d3;font-weight:600">已全部結清！</div></div>`
-    :sets.map(s=>`<div class="settle-row">
-      <div class="settle-from">${esc(s.from)}</div>
-      <div class="settle-mid"><div style="font-size:10px;color:#7f8fa6">支付給</div><div style="font-size:14px;font-weight:700;color:#ffd32a">${fmt(Math.round(s.amount))}</div><div style="font-size:10px;color:#7f8fa6">${fmtEUR(s.amount/config.eurRate)}</div></div>
-      <div class="settle-to">${esc(s.to)}</div>
-    </div>`).join("")}
-  </div>`;
+<div style="font-size:17px;font-weight:700;margin-bottom:4px">💱 匯率換算</div>
+<div style="font-size:12px;color:#7f8fa6;margin-bottom:18px">新台幣（TWD）↔ 歐元（EUR）</div>
+<div class="fx-rate-card">
+  <div style="font-size:11px;color:#7f8fa6;margin-bottom:6px">目前設定匯率</div>
+  <div style="font-size:28px;font-weight:800;color:#54a0ff">1 € = NT$ ${config.eurRate}</div>
+  <div style="font-size:11px;color:#7f8fa6;margin-top:4px">可在設定中修改匯率</div>
+</div>
+<div class="fx-dir-toggle">
+  <button class="fx-dir-btn ${convDir==="TWD_TO_EUR"?"active":""}" data-dir="TWD_TO_EUR"><div>NT$ → €</div><div style="font-size:10px;margin-top:2px">新台幣換歐元</div></button>
+  <button class="fx-dir-btn ${convDir==="EUR_TO_TWD"?"active":""}" data-dir="EUR_TO_TWD"><div>€ → NT$</div><div style="font-size:10px;margin-top:2px">歐元換新台幣</div></button>
+</div>
+<div class="form-group">
+  <div class="form-label">${convDir==="TWD_TO_EUR"?"輸入新台幣金額 (NT$)":"輸入歐元金額 (€)"}</div>
+  <input id="fx-input" type="number" placeholder="0" value="${fxInput}" style="font-size:22px;text-align:center;font-weight:700">
+</div>
+${res!==null?`<div class="fx-result">
+  <div style="font-size:12px;color:#7f8fa6;margin-bottom:8px">換算結果</div>
+  <div style="font-size:32px;font-weight:800;color:#ffd32a">${convDir==="TWD_TO_EUR"?fmtEUR(res):fmt(Math.round(res))}</div>
+  <div style="font-size:12px;color:#7f8fa6;margin-top:6px">${convDir==="TWD_TO_EUR"?`NT$ ${inp.toLocaleString()} ÷ ${config.eurRate} = €${res.toFixed(2)}`:`€${inp} × ${config.eurRate} = NT$ ${Math.round(res).toLocaleString()}`}</div>
+</div>`:""}
+<div class="card">
+  <div class="card-title">常用換算參考 <span style="font-size:10px">(點擊帶入)</span></div>
+  ${nums.map(v=>`<div class="fx-ref-row" data-fxval="${v}">
+    <span style="color:#aaa;font-size:14px">${convDir==="TWD_TO_EUR"?`NT$ ${v.toLocaleString()}`:`€ ${v}`}</span>
+    <span style="color:#ffd32a;font-weight:600;font-size:14px">${convDir==="TWD_TO_EUR"?`€ ${(v/config.eurRate).toFixed(2)}`:`NT$ ${Math.round(v*config.eurRate).toLocaleString()}`}</span>
+  </div>`).join("")}
+</div>`;
 }
 
-function renderFX() {
-  const nums = convDir==="TWD_TO_EUR"?[500,1000,3000,5000,10000,30000,50000]:[5,10,20,50,100,200,500];
-  const inp = parseFloat(document.getElementById("fx-input")?.value||"") || 0;
-  const res = inp ? (convDir==="TWD_TO_EUR" ? inp/config.eurRate : inp*config.eurRate) : null;
+function renderSettings(){
+  const members=settingsMembers.length>0?settingsMembers:[...getMembers()];
   return `
-  <div style="font-size:17px;font-weight:700;margin-bottom:4px">💱 匯率換算</div>
-  <div style="font-size:12px;color:#7f8fa6;margin-bottom:18px">新台幣（TWD）↔ 歐元（EUR）</div>
-  <div class="fx-rate-card">
-    <div style="font-size:11px;color:#7f8fa6;margin-bottom:6px">目前設定匯率</div>
-    <div style="font-size:28px;font-weight:800;color:#54a0ff">1 € = NT$ ${config.eurRate}</div>
-    <div style="font-size:11px;color:#7f8fa6;margin-top:4px">可在設定中修改匯率</div>
-  </div>
-  <div class="fx-dir-toggle">
-    <button class="fx-dir-btn ${convDir==="TWD_TO_EUR"?"active":""}" onclick="setConvDir('TWD_TO_EUR')"><div>NT$ → €</div><div style="font-size:10px;margin-top:2px">新台幣換歐元</div></button>
-    <button class="fx-dir-btn ${convDir==="EUR_TO_TWD"?"active":""}" onclick="setConvDir('EUR_TO_TWD')"><div>€ → NT$</div><div style="font-size:10px;margin-top:2px">歐元換新台幣</div></button>
-  </div>
-  <div class="form-group">
-    <div class="form-label">${convDir==="TWD_TO_EUR"?"輸入新台幣金額 (NT$)":"輸入歐元金額 (€)"}</div>
-    <input id="fx-input" type="number" placeholder="0" value="${inp||""}" oninput="updateFX(this.value)" style="font-size:22px;text-align:center;font-weight:700">
-  </div>
-  ${res?`<div class="fx-result">
-    <div style="font-size:12px;color:#7f8fa6;margin-bottom:8px">換算結果</div>
-    <div style="font-size:32px;font-weight:800;color:#ffd32a">${convDir==="TWD_TO_EUR"?fmtEUR(res):fmt(Math.round(res))}</div>
-    <div style="font-size:12px;color:#7f8fa6;margin-top:6px">${convDir==="TWD_TO_EUR"?`NT$ ${inp.toLocaleString()} ÷ ${config.eurRate} = €${res.toFixed(2)}`:`€${inp} × ${config.eurRate} = NT$ ${Math.round(res).toLocaleString()}`}</div>
-  </div>`:""}
-  <div class="card">
-    <div class="card-title">常用換算參考 <span style="font-size:10px">(點擊帶入)</span></div>
-    ${nums.map(v=>`<div class="fx-ref-row" onclick="setFXInput(${v})">
-      <span style="color:#aaa;font-size:14px">${convDir==="TWD_TO_EUR"?`NT$ ${v.toLocaleString()}`:`€ ${v}`}</span>
-      <span style="color:#ffd32a;font-weight:600;font-size:14px">${convDir==="TWD_TO_EUR"?`€ ${(v/config.eurRate).toFixed(2)}`:`NT$ ${Math.round(v*config.eurRate).toLocaleString()}`}</span>
-    </div>`).join("")}
-  </div>`;
-}
-
-function renderSettings(members) {
-  return `
-  <div style="font-size:17px;font-weight:700;margin-bottom:18px">⚙️ 旅遊設定</div>
-  <div class="form-group"><div class="form-label">旅遊名稱</div><input id="s-name" value="${esc(config.tripName)}" placeholder="例：歐洲家族旅遊"></div>
-  <div class="form-group"><div class="form-label">總預算 (TWD)</div><input id="s-budget" type="number" value="${config.budget}" placeholder="300000"></div>
-  <div class="form-group"><div class="form-label">歐元匯率（1 EUR = ? TWD）</div><input id="s-rate" type="number" value="${config.eurRate}" placeholder="35.5"></div>
-  <div class="form-group">
-    <div class="form-label">家族成員</div>
-    <div class="card" style="margin-bottom:0">
-      <div id="members-list">
-        ${members.map((m,i)=>`<div class="member-row" data-idx="${i}">
-          <input value="${esc(m)}" oninput="updateMember(${i},this.value)">
-          <button class="btn-remove" onclick="removeMember(${i})">✕</button>
-        </div>`).join("")}
-      </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <input id="new-member" placeholder="輸入新成員名稱" onkeydown="if(event.key==='Enter')addMember()" style="flex:1;padding:8px 12px;font-size:13px">
-        <button class="btn-add-member" onclick="addMember()">＋</button>
-      </div>
-      <div style="font-size:10px;color:#7f8fa6;margin-top:8px">共 ${members.length} 位成員・按 Enter 或 ＋ 新增</div>
+<div style="font-size:17px;font-weight:700;margin-bottom:18px">⚙️ 旅遊設定</div>
+<div class="form-group"><div class="form-label">旅遊名稱</div><input id="s-name" value="${esc(config.tripName)}" placeholder="例：歐洲家族旅遊"></div>
+<div class="form-group"><div class="form-label">總預算 (TWD)</div><input id="s-budget" type="number" value="${config.budget}"></div>
+<div class="form-group"><div class="form-label">歐元匯率（1 EUR = ? TWD）</div><input id="s-rate" type="number" value="${config.eurRate}"></div>
+<div class="form-group">
+  <div class="form-label">家族成員</div>
+  <div class="card" style="margin-bottom:0">
+    <div id="members-list">
+      ${members.map((m,i)=>`<div class="member-row">
+        <input class="s-member" data-idx="${i}" value="${esc(m)}">
+        <button class="btn-remove" data-remove="${i}">✕</button>
+      </div>`).join("")}
     </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <input id="new-member" placeholder="輸入新成員名稱" style="flex:1;padding:8px 12px;font-size:13px">
+      <button class="btn-add-member" id="btn-add-member">＋</button>
+    </div>
+    <div style="font-size:10px;color:#7f8fa6;margin-top:8px">共 ${members.length} 位成員・按 Enter 或 ＋ 新增</div>
   </div>
-  <button class="btn-primary" onclick="saveSettings()" ${syncing?"disabled":""}>${syncing?"同步中…":"儲存並同步至 Sheets"}</button>
-  <div class="danger-zone">
-    <div style="font-size:13px;color:#ff6b6b;margin-bottom:9px">⚠️ 危險區域</div>
-    <button onclick="clearAll()" style="width:100%;padding:10px;background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.3);border-radius:10px;color:#ff6b6b;font-size:13px;cursor:pointer;font-family:inherit">清除所有記錄</button>
-  </div>`;
+</div>
+<button class="btn-primary" id="btn-save-settings" ${syncing?"disabled":""}>
+  ${syncing?"同步中…":"儲存並同步至 Sheets"}
+</button>
+<div class="danger-zone">
+  <div style="font-size:13px;color:#ff6b6b;margin-bottom:9px">⚠️ 危險區域</div>
+  <button id="btn-clear-all" style="width:100%;padding:10px;background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.3);border-radius:10px;color:#ff6b6b;font-size:13px;cursor:pointer;font-family:inherit">清除所有記錄</button>
+</div>`;
 }
 
-function esc(s) {
-  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-// Event bindings
-function bindEvents() {
-  document.querySelectorAll(".cat-btn").forEach(btn=>{
-    btn.addEventListener("click",()=>{ form.category=btn.dataset.cat; updateFormUI(); });
-  });
-  document.querySelectorAll(".chip[data-member]").forEach(btn=>{
+// ── ATTACH EVENTS ──
+function attachEvents(){
+  // Nav
+  document.querySelectorAll(".nav-btn[data-view]").forEach(btn=>{
     btn.addEventListener("click",()=>{
-      const m=btn.dataset.member;
-      const members=getMembers();
-      const eff=form.splitAmong.length>0?form.splitAmong:[...members];
-      form.splitAmong=eff.includes(m)?eff.filter(x=>x!==m):[...eff,m];
-      updateFormUI();
+      const v=btn.dataset.view;
+      if(v==="add"){editId=null;form=emptyForm();}
+      if(v==="settings") settingsMembers=[...getMembers()];
+      view=v; render();
     });
   });
-  // Sync form fields live
-  ["f-title","f-amount","f-date","f-paidby","f-note"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    el.addEventListener("input",()=>{
-      form[{f:"title","f-amount":"amount","f-date":"date","f-paidby":"paidBy","f-note":"note"}[id]||id.replace("f-","")]=el.value;
-      if(id==="f-amount"||id==="f-date") updateFormUI();
-    });
-    el.addEventListener("change",()=>{ form[{f:"title","f-amount":"amount","f-date":"date","f-paidby":"paidBy","f-note":"note"}[id]||id.replace("f-","")]=el.value; });
-  });
-}
 
-function updateFormUI() {
-  if(view!=="add") return;
-  const members=getMembers();
-  const eff=form.splitAmong.length>0?form.splitAmong:members;
-  // Update cat buttons
-  document.querySelectorAll(".cat-btn").forEach(btn=>{
-    const cat=getCat(btn.dataset.cat);
-    btn.style.borderColor=form.category===btn.dataset.cat?cat.color:"rgba(255,255,255,0.1)";
-    btn.style.background=form.category===btn.dataset.cat?cat.color+"22":"rgba(255,255,255,0.04)";
-    btn.style.color=form.category===btn.dataset.cat?cat.color:"#aaa";
-  });
-  // Update chips
-  document.querySelectorAll(".chip[data-member]").forEach(btn=>{
-    btn.classList.toggle("active",eff.includes(btn.dataset.member));
-  });
-  // Update hints
-  const amtNum=Number(form.amount);
-  const hintEl=document.querySelector(".eur-hint");
-  if(hintEl&&form.amount&&!isNaN(amtNum)){
-    hintEl.textContent=form.currency==="TWD"?`≈ ${fmtEUR(amtNum/config.eurRate)}`:`≈ ${fmt(Math.round(amtNum*config.eurRate))}`;
+  // Header
+  const btnReload=document.getElementById("btn-reload");
+  if(btnReload) btnReload.addEventListener("click",()=>{ render(); loadAll(); });
+  const btnSettings=document.getElementById("btn-settings");
+  if(btnSettings) btnSettings.addEventListener("click",()=>{ settingsMembers=[...getMembers()]; view="settings"; render(); });
+
+  // Add form
+  if(view==="add"){
+    const fTitle=document.getElementById("f-title");
+    const fAmount=document.getElementById("f-amount");
+    const fDate=document.getElementById("f-date");
+    const fPaidby=document.getElementById("f-paidby");
+    const fNote=document.getElementById("f-note");
+    if(fTitle) fTitle.addEventListener("input",e=>{form.title=e.target.value;});
+    if(fAmount) fAmount.addEventListener("input",e=>{form.amount=e.target.value; updateAmountHint();});
+    if(fDate) fDate.addEventListener("change",e=>{form.date=e.target.value;});
+    if(fPaidby) fPaidby.addEventListener("change",e=>{form.paidBy=e.target.value;});
+    if(fNote) fNote.addEventListener("input",e=>{form.note=e.target.value;});
+
+    document.querySelectorAll(".cur-btn[data-cur]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        form.currency=btn.dataset.cur;
+        document.querySelectorAll(".cur-btn").forEach(b=>b.classList.toggle("active",b.dataset.cur===form.currency));
+        updateAmountHint();
+      });
+    });
+
+    document.querySelectorAll(".cat-btn[data-cat]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        form.category=btn.dataset.cat;
+        document.querySelectorAll(".cat-btn").forEach(b=>{
+          const cat=getCat(b.dataset.cat);
+          const active=b.dataset.cat===form.category;
+          b.style.borderColor=active?cat.color:"rgba(255,255,255,0.1)";
+          b.style.background=active?cat.color+"22":"rgba(255,255,255,0.04)";
+          b.style.color=active?cat.color:"#aaa";
+        });
+      });
+    });
+
+    document.querySelectorAll(".chip[data-member]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const m=btn.dataset.member;
+        const members=getMembers();
+        const eff=form.splitAmong.length>0?[...form.splitAmong]:[...members];
+        form.splitAmong=eff.includes(m)?eff.filter(x=>x!==m):[...eff,m];
+        document.querySelectorAll(".chip[data-member]").forEach(c=>{
+          const effNow=form.splitAmong.length>0?form.splitAmong:members;
+          c.classList.toggle("active",effNow.includes(c.dataset.member));
+        });
+        updatePerPerson();
+      });
+    });
+
+    const btnSubmit=document.getElementById("btn-submit");
+    if(btnSubmit) btnSubmit.addEventListener("click",submitForm);
+    const btnCancel=document.getElementById("btn-cancel");
+    if(btnCancel) btnCancel.addEventListener("click",()=>{editId=null;form=emptyForm();view="list";render();});
+  }
+
+  // List
+  if(view==="list"){
+    document.querySelectorAll(".filter-btn[data-filter]").forEach(btn=>{
+      btn.addEventListener("click",()=>{filterCat=btn.dataset.filter;render();});
+    });
+    document.querySelectorAll(".btn-edit[data-id]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const e=expenses.find(x=>x.id===btn.dataset.id);
+        if(!e)return;
+        form={...e,amount:String(e.originalAmount||e.amount),currency:e.originalCurrency||"TWD",splitAmong:e.splitAmong||[...getMembers()]};
+        editId=e.id; view="add"; render();
+      });
+    });
+    document.querySelectorAll(".btn-del[data-id]").forEach(btn=>{
+      btn.addEventListener("click",()=>delExp(btn.dataset.id));
+    });
+  }
+
+  // FX
+  if(view==="fx"){
+    document.querySelectorAll(".fx-dir-btn[data-dir]").forEach(btn=>{
+      btn.addEventListener("click",()=>{convDir=btn.dataset.dir;fxInput="";render();});
+    });
+    const fxEl=document.getElementById("fx-input");
+    if(fxEl) fxEl.addEventListener("input",e=>{fxInput=e.target.value;render();});
+    document.querySelectorAll(".fx-ref-row[data-fxval]").forEach(row=>{
+      row.addEventListener("click",()=>{fxInput=row.dataset.fxval;render();});
+    });
+  }
+
+  // Settings
+  if(view==="settings"){
+    document.querySelectorAll(".s-member[data-idx]").forEach(inp=>{
+      inp.addEventListener("input",e=>{
+        const i=parseInt(inp.dataset.idx);
+        settingsMembers[i]=e.target.value;
+      });
+    });
+    document.querySelectorAll(".btn-remove[data-remove]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const i=parseInt(btn.dataset.remove);
+        if(settingsMembers.length<=1)return;
+        settingsMembers.splice(i,1);
+        render();
+      });
+    });
+    const btnAddMember=document.getElementById("btn-add-member");
+    const newMemberInput=document.getElementById("new-member");
+    function addMember(){
+      if(!newMemberInput||!newMemberInput.value.trim())return;
+      settingsMembers.push(newMemberInput.value.trim());
+      render();
+    }
+    if(btnAddMember) btnAddMember.addEventListener("click",addMember);
+    if(newMemberInput) newMemberInput.addEventListener("keydown",e=>{if(e.key==="Enter")addMember();});
+
+    const btnSave=document.getElementById("btn-save-settings");
+    if(btnSave) btnSave.addEventListener("click",saveSettings);
+    const btnClear=document.getElementById("btn-clear-all");
+    if(btnClear) btnClear.addEventListener("click",clearAll);
   }
 }
 
-// Actions
-function setView(v) {
-  if(v==="add"){ editId=null; form=emptyForm(); }
-  view=v; render();
+function updateAmountHint(){
+  const el=document.getElementById("eur-hint");
+  if(!el)return;
+  const n=Number(form.amount);
+  if(form.amount&&!isNaN(n)){
+    el.textContent=form.currency==="TWD"?`≈ ${fmtEUR(n/config.eurRate)}`:`≈ ${fmt(Math.round(n*config.eurRate))}`;
+  } else { el.textContent=""; }
+  updatePerPerson();
 }
 
-function reload() { render(); loadAll(); }
-function setFilter(f){ filterCat=f; render(); }
-function setCur(c){ form.currency=c; updateFormUI(); render(); }
-function setConvDir(d){ convDir=d; render(); }
-function updateFX(){ render(); }
-function setFXInput(v){ convDir; render(); setTimeout(()=>{ const el=document.getElementById("fx-input"); if(el){el.value=v; updateFX();} },10); }
-
-function editExp(id) {
-  const e=expenses.find(x=>x.id===id);
-  if(!e)return;
-  form={...e, amount:String(e.originalAmount||e.amount), currency:e.originalCurrency||"TWD", splitAmong:e.splitAmong||[...getMembers()]};
-  editId=id; view="add"; render();
+function updatePerPerson(){
+  const el=document.getElementById("per-person-hint");
+  if(!el)return;
+  const members=getMembers();
+  const eff=form.splitAmong.length>0?form.splitAmong:members;
+  const n=Number(form.amount);
+  if(eff.length>0&&form.amount&&!isNaN(n)){
+    const pp=Math.round((form.currency==="EUR"?n*config.eurRate:n)/eff.length);
+    el.textContent=`每人負擔 ≈ ${fmt(pp)} ${fmtEUR(pp/config.eurRate)}`;
+  } else { el.textContent="每人平均分攤"; }
 }
 
-function cancelEdit(){ editId=null; form=emptyForm(); view="list"; render(); }
-
-async function delExp(id) {
-  if(!confirm("確定刪除這筆記錄？"))return;
-  setSyncing(true);
-  expenses=expenses.filter(e=>e.id!==id);
-  render();
-  try {
-    await jsonp({action:"delete",id});
-    showToast("🗑 已刪除");
-  } catch(e){ showToast("⚠️ 刪除失敗："+e.message); }
-  setSyncing(false); render();
-}
-
-async function submitForm() {
-  const title=document.getElementById("f-title")?.value||form.title;
-  const amount=document.getElementById("f-amount")?.value||form.amount;
-  const date=document.getElementById("f-date")?.value||form.date;
-  const paidBy=document.getElementById("f-paidby")?.value||form.paidBy;
-  const note=document.getElementById("f-note")?.value||form.note;
+async function submitForm(){
+  const fTitle=document.getElementById("f-title");
+  const fAmount=document.getElementById("f-amount");
+  const fDate=document.getElementById("f-date");
+  const fPaidby=document.getElementById("f-paidby");
+  const fNote=document.getElementById("f-note");
+  const title=(fTitle?fTitle.value:form.title).trim();
+  const amount=fAmount?fAmount.value:form.amount;
+  const date=fDate?fDate.value:form.date;
+  const paidBy=fPaidby?fPaidby.value:form.paidBy;
+  const note=fNote?fNote.value:form.note;
   if(!title||!amount){showToast("⚠️ 請填寫名稱和金額");return;}
   const members=getMembers();
   let amtTWD=Number(amount);
   if(form.currency==="EUR") amtTWD=Math.round(amtTWD*config.eurRate);
   const entry={
-    title, date, paidBy, note,
-    amount:amtTWD, originalAmount:Number(amount), originalCurrency:form.currency,
+    title,date,paidBy,note,
+    amount:amtTWD,originalAmount:Number(amount),originalCurrency:form.currency,
     category:form.category,
-    splitAmong:form.splitAmong.length>0?form.splitAmong:[...members],
+    splitAmong:form.splitAmong.length>0?[...form.splitAmong]:[...members],
     id:editId||String(Date.now()),
   };
   setSyncing(true);
   expenses=editId?expenses.map(e=>e.id===editId?entry:e):[...expenses,entry];
   form=emptyForm(); editId=null; view="list"; render();
-  try {
-    await jsonp({action:"save", expense:JSON.stringify(entry)});
+  try{
+    await jsonp({action:"save",expense:JSON.stringify(entry)});
     showToast("✅ 已同步至 Sheets");
-  } catch(e){
+  }catch(e){
     showToast("⚠️ 同步失敗："+e.message);
     const exps=await jsonp({action:"getAll"}).catch(()=>null);
-    if(Array.isArray(exps)){expenses=exps;}
+    if(Array.isArray(exps)) expenses=exps;
   }
   setSyncing(false); render();
 }
 
-// Settings helpers
-function updateMember(i,v){ config.members[i]=v; }
-function removeMember(i){ if(config.members.length<=1)return; config.members.splice(i,1); render(); }
-function addMember(){
-  const el=document.getElementById("new-member");
-  if(!el||!el.value.trim())return;
-  config.members.push(el.value.trim());
+async function delExp(id){
+  if(!confirm("確定刪除這筆記錄？"))return;
+  setSyncing(true);
+  expenses=expenses.filter(e=>e.id!==id);
   render();
+  try{
+    await jsonp({action:"delete",id});
+    showToast("🗑 已刪除");
+  }catch(e){ showToast("⚠️ 刪除失敗："+e.message); }
+  setSyncing(false); render();
 }
 
 async function saveSettings(){
   const name=document.getElementById("s-name")?.value;
   const budget=document.getElementById("s-budget")?.value;
   const rate=document.getElementById("s-rate")?.value;
+  // Read current member inputs
+  document.querySelectorAll(".s-member[data-idx]").forEach(inp=>{
+    const i=parseInt(inp.dataset.idx);
+    settingsMembers[i]=inp.value;
+  });
   if(name) config.tripName=name;
   if(budget) config.budget=Number(budget);
   if(rate) config.eurRate=Number(rate);
+  if(settingsMembers.length>0) config.members=[...settingsMembers];
   setSyncing(true);
-  try {
-    await jsonp({action:"saveConfig", config:JSON.stringify(config)});
+  try{
+    await jsonp({action:"saveConfig",config:JSON.stringify(config)});
     showToast("✅ 設定已同步");
-  } catch(e){ showToast("⚠️ 同步失敗："+e.message); }
-  setSyncing(false); view="dashboard"; render();
+  }catch(e){ showToast("⚠️ 同步失敗："+e.message); }
+  setSyncing(false); settingsMembers=[]; view="dashboard"; render();
 }
 
 async function clearAll(){
-  if(!confirm("確定要清除所有記錄嗎？"))return;
+  if(!confirm("確定要清除所有記錄嗎？這也會清除 Google Sheets 的資料。"))return;
   setSyncing(true);
-  for(const e of expenses){
+  for(const e of [...expenses]){
     await jsonp({action:"delete",id:e.id}).catch(()=>{});
   }
   expenses=[]; setSyncing(false);
@@ -682,6 +696,7 @@ async function clearAll(){
 
 // Boot
 loadAll();
+})();
 </script>
 </body>
 </html>
